@@ -1,4 +1,3 @@
-// server.js
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -6,7 +5,7 @@ const cors = require('cors');
 require('dotenv').config(); // Load environment variables
 
 const app = express();
-const port = process.env.PORT || 5000; // Use the PORT environment variable
+const port = process.env.PORT //|| 5000; // Use the PORT environment variable
 
 // Middleware
 app.use(cors());
@@ -19,8 +18,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => console.log('MongoDB connected successfully'))
 .catch((err) => {
-  console.error('MongoDB connection error:', err.message); // Detailed error logging
-  process.exit(1); // Optional: exit the app if DB connection fails
+  console.error('MongoDB connection error:', err.message);
+  process.exit(1); // 
 });
 
 // Product Schema
@@ -29,13 +28,14 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   stock: { type: Number, required: true }, // Stock Quantity
   description: { type: String },
-  images: [{ type: String }], // Array of image URLs
-  category: { type: String, required: true }, // Category of the product
+  category: { type: String, required: true }, // Add category field
+  image: { type: String }, // Single image URL
 });
 
 const Product = mongoose.model('Product', productSchema);
 
 // Routes
+
 // Create a new product
 app.post('/api/products', async (req, res) => {
   try {
@@ -43,6 +43,7 @@ app.post('/api/products', async (req, res) => {
     await product.save();
     res.status(201).json(product);
   } catch (error) {
+    console.error('Error creating product:', error.message); // Detailed error logging
     res.status(400).json({ message: error.message });
   }
 });
@@ -53,6 +54,7 @@ app.get('/api/products', async (req, res) => {
     const products = await Product.find();
     res.status(200).json(products);
   } catch (error) {
+    console.error('Error fetching products:', error.message); // Detailed error logging
     res.status(500).json({ message: error.message });
   }
 });
@@ -64,6 +66,7 @@ app.get('/api/products/:id', async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.status(200).json(product);
   } catch (error) {
+    console.error('Error fetching product:', error.message); // Detailed error logging
     res.status(500).json({ message: error.message });
   }
 });
@@ -75,7 +78,8 @@ app.put('/api/products/:id', async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.status(200).json(product);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error updating product:', error.message); // Detailed error logging
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -84,13 +88,14 @@ app.delete('/api/products/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.status(200).json({ message: 'Product deleted' });
+    res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
+    console.error('Error deleting product:', error.message); // Detailed error logging
     res.status(500).json({ message: error.message });
   }
 });
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
